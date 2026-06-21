@@ -131,13 +131,22 @@ void LdfTableWidget::set_entries(const std::vector<lu::assets::LdfEntry>& entrie
 
 void LdfTableWidget::set_config(const lu::assets::LdfConfig& config) {
     table_->blockSignals(true);
-    table_->setColumnCount(2);
-    table_->setHorizontalHeaderLabels({"Key", "Value"});
-    table_->setItemDelegateForColumn(1, nullptr);
+    table_->setColumnCount(3);
+    table_->setHorizontalHeaderLabels({"Key", "Type", "Value"});
+    table_->setItemDelegateForColumn(1, new LdfTypeDelegate(table_));
     table_->setRowCount(static_cast<int>(config.size()));
     for (int i = 0; i < static_cast<int>(config.size()); ++i) {
         table_->setItem(i, 0, new QTableWidgetItem(sanitize(config[i].first)));
-        table_->setItem(i, 1, new QTableWidgetItem(sanitize(config[i].second)));
+        const auto& val = config[i].second;
+        auto colon = val.find(':');
+        if (colon != std::string::npos) {
+            uint8_t type_id = static_cast<uint8_t>(std::atoi(val.substr(0, colon).c_str()));
+            table_->setItem(i, 1, new QTableWidgetItem(ldf_type_display(type_id)));
+            table_->setItem(i, 2, new QTableWidgetItem(sanitize(val.substr(colon + 1))));
+        } else {
+            table_->setItem(i, 1, new QTableWidgetItem(ldf_type_display(255)));
+            table_->setItem(i, 2, new QTableWidgetItem(sanitize(val)));
+        }
     }
     table_->blockSignals(false);
 }
