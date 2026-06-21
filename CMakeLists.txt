@@ -32,6 +32,22 @@ else()
     message(STATUS "Skipping qt_common (Qt6 not found)")
 endif()
 
+# lu_widgets — Qt widgets that depend on lu_assets types (LDF table, Vec3/Quat editors)
+if(Qt6_FOUND AND TARGET lu_assets)
+    add_library(lu_widgets STATIC
+        src/lu_widgets/ldf_table_widget.h src/lu_widgets/ldf_table_widget.cpp
+        src/lu_widgets/vec_edit_widget.h src/lu_widgets/vec_edit_widget.cpp
+    )
+    target_link_libraries(lu_widgets PUBLIC Qt6::Widgets lu_assets)
+    target_compile_features(lu_widgets PUBLIC cxx_std_20)
+    target_include_directories(lu_widgets PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/lu_widgets>
+    )
+    add_library(tool_common::lu_widgets ALIAS lu_widgets)
+else()
+    message(STATUS "Skipping lu_widgets (Qt6 or lu_assets not found)")
+endif()
+
 # gl_viewport — standalone OpenGL viewport, no lu_assets dependency
 find_package(Qt6 COMPONENTS Widgets OpenGLWidgets QUIET)
 find_package(OpenGL QUIET)
