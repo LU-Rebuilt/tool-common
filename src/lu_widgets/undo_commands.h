@@ -41,11 +41,13 @@ public:
         if (refresh_) refresh_();
     }
 
-    int id() const override { return 100; }
+    int id() const override { return merge_id_; }
+    void set_merge_id(int id) { merge_id_ = id; }
 
     bool mergeWith(const QUndoCommand* other) override {
         auto* o = dynamic_cast<const EditFieldCommand<T>*>(other);
-        if (!o) return false;
+        if (!o || merge_id_ < 0) return false;
+        if (o->merge_id_ != merge_id_) return false;
         new_ = o->new_;
         return true;
     }
@@ -56,6 +58,7 @@ private:
     DirtyMarker dirty_;
     RefreshCallback refresh_;
     bool first_redo_ = true;
+    int merge_id_ = -1;
 };
 
 template<typename T>
