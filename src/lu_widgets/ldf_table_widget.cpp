@@ -11,6 +11,7 @@ namespace lu_widgets {
 static QString sanitize(const std::string& s) {
     QString qs = QString::fromLatin1(s.data(), static_cast<int>(s.size()));
     qs.replace(QChar('\0'), ", ");
+    qs.replace(QChar('\x1d'), " | "); // U+001D Group Separator used as list delimiter in WString LDF values
     return qs;
 }
 
